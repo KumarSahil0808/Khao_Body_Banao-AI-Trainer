@@ -133,18 +133,4 @@ python app.py
 
 ---
 
-## 💻 Developer
 
-Created with visual excellence and clean coding by:
-
-<p align="left">
-  <a>
-    <img src="https://img.shields.io/badge/Developer-SK-39ff14?style=for-the-badge&logo=github&logoColor=black&labelColor=121222" alt="SK Badge" />
-  </a>
-</p>
-
----
-
-<p align="center">
-  ⭐ <b>If this project made you want to exercise or code, drop a Star!</b> ⭐
-</p>
