@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="AI Fitness Trainer — real-time pose detection, rep counting, calorie tracking and posture coaching powered by MediaPipe." />
+    <title>AI FITNESS TRAINER — Cybernetic Performance System</title>
+
+    <!-- Fonts: Inter + JetBrains Mono (Stitch design system) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════════════ -->
+    <header class="app-header" role="banner">
+        <div class="header-left">
+            <div class="logo" aria-label="AI Fitness Trainer logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                    <circle cx="16" cy="16" r="15" stroke="#39ff14" stroke-width="2" />
+                    <path d="M9 16 L13 10 L16 14 L20 8 L23 16" stroke="#39ff14" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <circle cx="9" cy="16" r="2" fill="#39ff14" />
+                    <circle cx="23" cy="16" r="2" fill="#39ff14" />
+                </svg>
+            </div>
+            <h1 class="app-title">AI FITNESS TRAINER</h1>
+        </div>
+        <div class="header-right">
+            <button class="voice-toggle-btn active" id="voice-toggle-btn" aria-label="Toggle Voice Coach" aria-pressed="true">
+                <svg class="voice-toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 1a4 4 0 0 0-4 4v6a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4Z" fill="currentColor" opacity="0.85"/>
+                    <path d="M19 10v1a7 7 0 0 1-14 0v-1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span class="voice-toggle-label mono" id="voice-toggle-label">VOICE ON</span>
+            </button>
+            <div class="status-badge" id="connection-badge" aria-live="polite">
+                <span class="status-dot pulsing" id="status-dot"></span>
+                <span class="status-label" id="status-label">CONNECTING</span>
+            </div>
+            <div class="session-timer" id="session-timer" aria-label="Session duration">
+                <span class="mono">00:00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════
+       MAIN DASHBOARD
+  ═══════════════════════════════════════════════ -->
+    <main class="dashboard" role="main">
+
+        <!-- ─── LEFT PANEL: Stats ─── -->
+        <aside class="panel panel-left" aria-label="Workout statistics">
+
+            <!-- Mode -->
+            <div class="glass-card mode-card">
+                <span class="card-label">CURRENT MODE</span>
+                <div class="mode-name" id="mode-name">BICEP CURL</div>
+            </div>
+
+            <!-- Rep Counter with SVG Ring -->
+            <div class="glass-card rep-card">
+                <span class="card-label">REPS</span>
+                <div class="rep-ring-container" aria-label="Rep count">
+                    <svg class="rep-ring" viewBox="0 0 120 120" aria-hidden="true">
+                        <!-- Ghost track -->
+                        <circle cx="60" cy="60" r="50" class="ring-track" />
+                        <!-- Active segment -->
+                        <circle cx="60" cy="60" r="50" class="ring-progress" id="ring-progress" stroke-dasharray="314"
+                            stroke-dashoffset="314" />
+                    </svg>
+                    <div class="rep-number-wrap">
+                        <span class="rep-number mono" id="rep-counter">0</span>
+                        <span class="rep-goal mono">/ 30</span>
+                    </div>
+                </div>
+                <div class="stage-badge" id="stage-badge">---</div>
+
+                <!-- Separate counters for Left/Right arm curls -->
+                <div class="curl-counters-container" id="curl-counters-container" style="display: none;">
+                    <div class="curl-counter-col">
+                        <span class="curl-label">LEFT REPS</span>
+                        <span class="curl-number mono" id="left-rep-counter">0</span>
+                        <div class="stage-badge" id="left-stage-badge">---</div>
+                    </div>
+                    <div class="curl-counter-col">
+                        <span class="curl-label">RIGHT REPS</span>
+                        <span class="curl-number mono" id="right-rep-counter">0</span>
+                        <div class="stage-badge" id="right-stage-badge">---</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats grid -->
+            <div class="stats-grid">
+                <!-- Calories -->
+                <div class="glass-card stat-card" id="cal-card">
+                    <span class="card-label">CALORIES</span>
+                    <div class="stat-value stat-blue">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                            <path d="M8 1 C8 1 3 6 3 10 C3 13.3 5.2 15 8 15 C10.8 15 13 13.3 13 10 C13 6 8 1 8 1Z"
+                                fill="#00fbfb" opacity="0.8" />
+                        </svg>
+                        <span class="mono" id="calories">0.00</span>
+                        <span class="stat-unit">kcal</span>
+                    </div>
+                </div>
+
+                <!-- Angle -->
+                <div class="glass-card stat-card" id="angle-card">
+                    <span class="card-label">JOINT ANGLE</span>
+                    <div class="stat-value">
+                        <span class="mono" id="joint-angle">---</span>
+                        <span class="stat-unit">°</span>
+                    </div>
+                </div>
+
+                <!-- FPS -->
+                <div class="glass-card stat-card" id="fps-card">
+                    <span class="card-label">FPS</span>
+                    <div class="stat-value stat-dim">
+                        <span class="mono" id="fps-val">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Posture -->
+            <div class="glass-card posture-card" id="posture-card" aria-live="polite">
+                <div class="posture-header">
+                    <span class="card-label">POSTURE</span>
+                    <span class="posture-dot" id="posture-dot"></span>
+                </div>
+                <div class="posture-status" id="posture-status">AWAITING POSE…</div>
+                <div class="posture-warning" id="posture-warning"></div>
+            </div>
+
+        </aside>
+
+        <!-- ─── CENTER: Video Feed ─── -->
+        <section class="panel panel-center" aria-label="Live camera feed">
+
+            <div class="feed-wrapper">
+                <!-- MJPEG feed from Flask backend -->
+                <img id="video-feed" class="video-feed" alt="Live camera feed with pose detection" src="" />
+
+                <!-- Offline overlay -->
+                <div class="feed-overlay" id="feed-overlay">
+                    <div class="overlay-icon" aria-hidden="true">
+                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                            <circle cx="32" cy="32" r="30" stroke="#39ff14" stroke-width="2" opacity="0.3" />
+                            <circle cx="32" cy="20" r="10" stroke="#39ff14" stroke-width="2" />
+                            <path d="M14 52 C14 42 50 42 50 52" stroke="#39ff14" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div class="overlay-text" id="overlay-text">BACKEND OFFLINE</div>
+                    <div class="overlay-sub">Start the Flask server to begin tracking</div>
+                    <button class="btn-primary" id="reconnect-btn" aria-label="Reconnect to backend">
+                        RECONNECT
+                    </button>
+                </div>
+
+                <!-- Form warning banner (rendered by backend on frame, mirrored here too) -->
+                <div class="form-warning-banner" id="form-warning-banner" aria-live="assertive"></div>
+            </div>
+
+            <!-- KHAO BODY BNAO: AI Protein & Diet Recommendation System -->
+            <div class="glass-card diet-card">
+                <div class="diet-header">
+                    <span class="card-label">KHAO BODY BNAO</span>
+                    <span class="diet-tagline">Eat Smart. Build Strong.</span>
+                </div>
+                
+                <div class="diet-inputs-row">
+                    <div class="diet-input-group">
+                        <label for="weight-input" class="diet-label">BODY WEIGHT (KG)</label>
+                        <input type="number" id="weight-input" class="diet-input mono" placeholder="70" min="20" max="250" value="70">
+                    </div>
+                    
+                    <div class="diet-input-group">
+                        <label for="goal-select" class="diet-label">FITNESS GOAL</label>
+                        <select id="goal-select" class="diet-input mono">
+                            <option value="gain">Muscle Gain</option>
+                            <option value="loss">Fat Loss</option>
+                            <option value="maintain">Maintenance</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn-primary diet-btn" id="generate-diet-btn">
+                        GENERATE DIET PLAN
+                    </button>
+                </div>
+                
+                <div class="diet-results" id="diet-results" style="display: none;">
+                    <div class="diet-stats-grid">
+                        <div class="diet-stat-box">
+                            <span class="diet-stat-label">RECOMMENDED PROTEIN</span>
+                            <span class="diet-stat-val mono" id="recommend-protein">--</span>
+                        </div>
+                        <div class="diet-stat-box">
+                            <span class="diet-stat-label">ESTIMATED CALORIES</span>
+                            <span class="diet-stat-val mono" id="recommend-calories">--</span>
+                        </div>
+                        <div class="diet-stat-box">
+                            <span class="diet-stat-label">SUGGESTED WATER</span>
+                            <span class="diet-stat-val mono" id="recommend-water">--</span>
+                        </div>
+                    </div>
+                    
+                    <div class="diet-plan-grid">
+                        <div class="meal-card">
+                            <div class="meal-header">
+                                <span class="meal-icon">🍳</span>
+                                <span class="meal-title">BREAKFAST</span>
+                            </div>
+                            <div class="meal-content" id="meal-breakfast">--</div>
+                        </div>
+                        <div class="meal-card">
+                            <div class="meal-header">
+                                <span class="meal-icon">🍲</span>
+                                <span class="meal-title">LUNCH</span>
+                            </div>
+                            <div class="meal-content" id="meal-lunch">--</div>
+                        </div>
+                        <div class="meal-card">
+                            <div class="meal-header">
+                                <span class="meal-icon">🥛</span>
+                                <span class="meal-title">EVENING SNACK</span>
+                            </div>
+                            <div class="meal-content" id="meal-snack">--</div>
+                        </div>
+                        <div class="meal-card">
+                            <div class="meal-header">
+                                <span class="meal-icon">🍗</span>
+                                <span class="meal-title">DINNER</span>
+                            </div>
+                            <div class="meal-content" id="meal-dinner">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ─── RIGHT PANEL: Coach & Tips ─── -->
+        <aside class="panel panel-right" aria-label="Coach tips and session info">
+
+            <!-- Voice Coach Status Card -->
+            <div class="glass-card voice-coach-card" id="voice-coach-card">
+                <div class="voice-coach-header">
+                    <span class="card-label">AI VOICE COACH</span>
+                    <span class="voice-status-indicator" id="voice-status-indicator">
+                        <span class="voice-status-dot" id="voice-status-dot"></span>
+                        <span class="voice-status-text mono" id="voice-status-text">READY</span>
+                    </span>
+                </div>
+                <div class="voice-waveform" id="voice-waveform" aria-hidden="true">
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                </div>
+                <div class="voice-last-msg mono" id="voice-last-msg">"Awaiting workout…"</div>
+            </div>
+
+            <!-- Coach card -->
+            <div class="glass-card coach-card">
+                <span class="card-label">AI COACH</span>
+                <div class="coach-quote" id="coach-quote">"Stay focused. Every rep brings you closer to your goal."
+                </div>
+            </div>
+
+            <!-- Form tips -->
+            <div class="glass-card tips-card">
+                <span class="card-label">FORM TIPS</span>
+                <ul class="tips-list" id="tips-list">
+                    <li>Keep your back straight</li>
+                    <li>Control the movement</li>
+                    <li>Breathe on each rep</li>
+                </ul>
+            </div>
+
+            <!-- Session summary -->
+            <div class="glass-card summary-card">
+                <span class="card-label">SESSION SUMMARY</span>
+                <div class="summary-row">
+                    <span>Total Reps</span>
+                    <span class="mono" id="summary-reps">0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Calories Burned</span>
+                    <span class="mono" id="summary-cals">0.00 kcal</span>
+                </div>
+                <div class="summary-row">
+                    <span>Mode</span>
+                    <span class="mono" id="summary-mode">CURL</span>
+                </div>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════════════
+       BOTTOM ACTION BAR
+  ═══════════════════════════════════════════════ -->
+    <nav class="action-bar" role="navigation" aria-label="Exercise controls">
+        <div class="mode-buttons">
+            <button class="mode-btn active" id="btn-curl" data-mode="curl" aria-pressed="true">
+                <span class="btn-icon">💪</span> CURL
+            </button>
+            <button class="mode-btn" id="btn-pushup" data-mode="pushup" aria-pressed="false">
+                <span class="btn-icon">⬇️</span> PUSH-UP
+            </button>
+            <button class="mode-btn" id="btn-squat" data-mode="squat" aria-pressed="false">
+                <span class="btn-icon">🦵</span> SQUAT
+            </button>
+        </div>
+        <button class="btn-reset" id="btn-reset" aria-label="Reset rep counter">
+            ↺ RESET
+        </button>
+    </nav>
+
+    <span class="sk-sig" aria-hidden="true">SK</span>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
